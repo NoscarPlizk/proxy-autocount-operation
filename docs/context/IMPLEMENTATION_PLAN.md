@@ -88,7 +88,7 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 
 #### Deliverables
 
-- Add a TypeScript/Node.js/Express backend under `server/`.
+- Add a TypeScript/Node.js/Express backend under the repository-root `backend/` folder; keep all backend implementation and backend test files within that folder.
 - Add validated server-only configuration and health/readiness routes.
 - Implement a centralized AutoCount adapter with mandatory headers, JSON handling, timeout/cancellation, pagination helpers, normalized errors, and safe structured telemetry.
 - Do not expose a generic arbitrary-request route or any write method.

@@ -284,15 +284,16 @@ validation/matching      job processor
 
 ```text
 src/                         React application (already present)
-server/src/
-  config/                    validated backend configuration
-  http/                      Express setup, middleware, controllers
-  application/               use cases and workflow orchestration
-  domain/                    validation, matching, state rules
-  integrations/autocount/    one AutoCount client/adapter
-  jobs/                      controlled per-record processing
-  persistence/               repositories and transaction boundaries
-server/test/                 backend unit/contract/integration tests
+backend/                     exclusive root for all backend code
+  src/
+    config/                  validated backend configuration
+    http/                    Express setup, middleware, controllers
+    application/             use cases and workflow orchestration
+    domain/                  validation, matching, state rules
+    integrations/autocount/  one AutoCount client/adapter
+    jobs/                    controlled per-record processing
+    persistence/             repositories and transaction boundaries
+  test/                      backend unit/contract/integration tests
 shared/                      narrowly scoped shared transport contracts
 db/migrations/               versioned schema changes when DB is introduced
 docs/
@@ -304,6 +305,7 @@ docs/
 
 - **Existing and implemented:** React 19, TypeScript, Vite.
 - **Confirmed preference:** React-Bootstrap, React Router, Node.js, Express, and PostgreSQL when persistence is required.
+- **Confirmed repository boundary:** all backend code must live under the repository-root `backend/` folder. This includes backend server and root entry files, routes and endpoint modules, configuration, middleware, controllers, services, domain logic, integrations, jobs, persistence code, backend-only helpers, and backend tests. Do not place backend implementation files elsewhere in the repository.
 - **Proposed decision:** use TypeScript in both frontend and backend for consistent contracts and safer adapter/payload code.
 - **Proposed decision:** begin with a single deployable backend process and an in-process worker abstraction; introduce an external queue only when durability/concurrency requirements justify it.
 - **Proposed decision:** add PostgreSQL before persistent staging/job processing in Phase 2, not solely for the Phase 1 connectivity spike.
@@ -314,6 +316,7 @@ docs/
 **Confirmed requirements:**
 
 - Frontend and backend application code must use TypeScript.
+- Treat `backend/` as the exclusive backend code root. Any new or moved backend implementation must be placed within that folder.
 - In frontend code, reuse existing components and functions when their behavior and requirements are sufficiently similar. Extract a shared component when doing so reduces meaningful duplication without obscuring feature-specific differences.
 - Avoid repeated implementation in both frontend and backend code. Extract and reuse common behavior where appropriate while keeping abstractions aligned with actual feature requirements.
 - Every backend endpoint call must be encapsulated in a named function. The endpoint invocation belongs inside that function; callers must invoke the function, await its result, and return or otherwise consume the returned value rather than making inline endpoint calls.
@@ -390,7 +393,7 @@ The starter screen must not be interpreted as product functionality.
 
 ### Proposed decisions awaiting implementation evidence
 
-- Keep the current root Vite frontend and add `server/` rather than immediately converting to a complex monorepo.
+- Keep the current root Vite frontend and place the entire backend under `backend/` rather than immediately converting to a complex monorepo.
 - Use TypeScript end-to-end.
 - Implement an adapter interface around AutoCount to make contract tests and safe mocks straightforward.
 - Use explicit workflow state machines and append-only audit events.
