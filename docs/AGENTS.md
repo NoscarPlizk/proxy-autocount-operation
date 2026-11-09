@@ -5,7 +5,7 @@
 Before changing code or project documentation:
 
 1. Read this file in full.
-2. Read `docs/PROJECT_CONTEXT.md` and `docs/IMPLEMENTATION_PLAN.md`.
+2. Read `docs/context/PROJECT_CONTEXT.md` and `docs/context/IMPLEMENTATION_PLAN.md`.
 3. Inspect the current implementation and tests; do not infer status from plans alone.
 4. Check the working tree and preserve unrelated user changes.
 5. For any AutoCount operation, consult the current official documentation at <https://accounting-api.autocountcloud.com/documentation/> and the official Swagger reference at <https://accounting-api.autocountcloud.com/swagger/index.html>.
@@ -38,7 +38,7 @@ Use these sources in order:
 
 1. Observed behavior from an authorized, controlled test against a non-production account book, recorded with the test conditions.
 2. Current official AutoCount documentation and Swagger definitions.
-3. Repository decisions and requirements in `docs/PROJECT_CONTEXT.md`.
+3. Repository decisions and requirements in `docs/context/PROJECT_CONTEXT.md`.
 4. Explicitly labelled design proposals and assumptions.
 
 When sources conflict, stop write-path work, record the conflict, and resolve it before continuing. Never use an assumption to authorize a financial write.
@@ -158,7 +158,7 @@ Before handing off a change, run the relevant formatter/linter, type-check/build
 - Do not weaken validation, approval, auditing, or permissions to make a workflow pass.
 - Do not add fallback behavior that guesses accounting identities or values.
 - Keep destructive actions opt-in, narrowly scoped, and recoverable where possible.
-- Record important architectural decisions and their reasons in `docs/PROJECT_CONTEXT.md`.
+- Record important architectural decisions and their reasons in `docs/context/PROJECT_CONTEXT.md`.
 
 ## Context maintenance
 

@@ -4,7 +4,7 @@
 **Implementation status reviewed:** 2026-11-09  
 **Official API documentation reviewed:** 2026-11-09
 
-This is the primary durable context for the project. Future development sessions must read it together with the repository implementation, `AGENTS.md`, and `docs/IMPLEMENTATION_PLAN.md`.
+This is the primary durable context for the project. Future development sessions must read it together with the repository implementation, `docs/AGENTS.md`, and `docs/context/IMPLEMENTATION_PLAN.md`.
 
 ## 1. Project overview and business motivation
 
@@ -295,7 +295,9 @@ server/src/
 server/test/                 backend unit/contract/integration tests
 shared/                      narrowly scoped shared transport contracts
 db/migrations/               versioned schema changes when DB is introduced
-docs/                        durable context, plans, decisions, runbooks
+docs/
+  AGENTS.md                  durable agent instructions
+  context/                   project context and implementation plans
 ```
 
 ### Technology direction
@@ -342,7 +344,7 @@ docs/                        durable context, plans, decisions, runbooks
 
 - A minimal React 19 + TypeScript + Vite starter scaffold exists at the repository root.
 - ESLint and TypeScript/Vite build scripts exist.
-- Project initialization context is captured in `AGENTS.md`, this file, and `docs/IMPLEMENTATION_PLAN.md`.
+- Project initialization context is captured in `docs/AGENTS.md`, this file, and `docs/context/IMPLEMENTATION_PLAN.md`.
 
 ### Tested
 

@@ -24,8 +24,8 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 
 - [x] Inspect the current repository and Git state.
 - [x] Identify the existing React/TypeScript/Vite scaffold and preserve it.
-- [x] Create `AGENTS.md` with durable agent, safety, security, testing, and maintenance rules.
-- [x] Create `docs/PROJECT_CONTEXT.md` with requirements, status, risks, decisions, and open questions.
+- [x] Create `docs/AGENTS.md` with durable agent, safety, security, testing, and maintenance rules.
+- [x] Create `docs/context/PROJECT_CONTEXT.md` with requirements, status, risks, decisions, and open questions.
 - [x] Create this phased implementation plan.
 - [x] Review the official API getting-started and relevant invoice/payment/knock-off documentation at a documentation level.
 - [x] Record documentation-verified facts separately from untested behavior.
@@ -119,7 +119,7 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 - Add a minimal administrator/development view for connection status, customer results, and invoice results.
 - Perform authorized read-only calls against the designated test account book.
 - Capture sanitized evidence: result shapes, pagination behavior, errors, rate-limit headers, latency, permissions, and observed last-modified fields.
-- Update `docs/PROJECT_CONTEXT.md` from “documentation-verified” to “environment-tested” only for behaviors actually observed.
+- Update `docs/context/PROJECT_CONTEXT.md` from “documentation-verified” to “environment-tested” only for behaviors actually observed.
 
 #### Dependencies
 
