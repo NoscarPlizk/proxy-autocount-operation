@@ -309,6 +309,18 @@ docs/
 - **Proposed decision:** add PostgreSQL before persistent staging/job processing in Phase 2, not solely for the Phase 1 connectivity spike.
 - **Open selection:** spreadsheet/grid component, runtime schema library, database access library, decimal library, test framework, authentication provider, and hosting platform.
 
+### TypeScript code organization and reuse conventions
+
+**Confirmed requirements:**
+
+- Frontend and backend application code must use TypeScript.
+- In frontend code, reuse existing components and functions when their behavior and requirements are sufficiently similar. Extract a shared component when doing so reduces meaningful duplication without obscuring feature-specific differences.
+- Avoid repeated implementation in both frontend and backend code. Extract and reuse common behavior where appropriate while keeping abstractions aligned with actual feature requirements.
+- Every backend endpoint call must be encapsulated in a named function. The endpoint invocation belongs inside that function; callers must invoke the function, await its result, and return or otherwise consume the returned value rather than making inline endpoint calls.
+- A main component and its closely related subcomponents may remain together in the same file when that keeps the feature cohesive and readable.
+- Helper functions must live in a separate helper or utility file or folder, be exported, and be imported by the main code that uses them. Do not place helper-function implementations in the main component file.
+- Organize code by responsibility: the main component owns the feature's primary structure and orchestration, subcomponents own smaller UI parts, and helper functions perform focused utility work.
+
 ## 12. Security and accounting integrity
 
 - Secrets remain server-side in environment variables or an approved secret manager.
