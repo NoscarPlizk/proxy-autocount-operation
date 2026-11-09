@@ -303,7 +303,7 @@ docs/
 
 ### Technology direction
 
-- **Existing and implemented:** React 19, TypeScript, Vite.
+- **Existing and implemented:** React 19, TypeScript, Vite, React Router, Node.js, and Express.
 - **Confirmed preference:** React-Bootstrap, React Router, Node.js, Express, and PostgreSQL when persistence is required.
 - **Confirmed repository boundary:** all backend code must live under the repository-root `backend/` folder. This includes backend server and root entry files, routes and endpoint modules, configuration, middleware, controllers, services, domain logic, integrations, jobs, persistence code, backend-only helpers, and backend tests. Do not place backend implementation files elsewhere in the repository.
 - **Proposed decision:** use TypeScript in both frontend and backend for consistent contracts and safer adapter/payload code.
@@ -357,20 +357,26 @@ docs/
 
 ### Implemented
 
-- A minimal React 19 + TypeScript + Vite starter scaffold exists at the repository root.
-- ESLint and TypeScript/Vite build scripts exist.
+- A React 19 + TypeScript + Vite portal exists at the repository root with React Router nested routes.
+- The first layer at `/` retrieves safe company metadata from the backend and displays three company choices with local configuration status.
+- The second layer uses `/companies/:companySlug` and nested Sales, Purchase, and Accounting routes so company context remains in the URL.
+- A TypeScript/Express backend exists under `backend/` with health and safe company-metadata routes.
+- Three separate AutoCount configuration bundles are modeled in one backend-only `.env`; each bundle requires a root URL, Key ID, and API key. Only a placeholder `backend/.env.example` is committed.
+- Missing, partial, placeholder, non-HTTPS, and root-only URL configurations are classified without returning secrets to the browser.
+- ESLint and frontend/backend TypeScript build scripts exist.
 - Project initialization context is captured in `docs/AGENTS.md`, this file, and `docs/context/IMPLEMENTATION_PLAN.md`.
 
 ### Tested
 
-- No AutoCount integration, accounting workflow, or application feature has been environment-tested.
-- On 2026-11-09, the unchanged starter scaffold passed `npm run lint` and `npm run build` after the context files were added.
+- No AutoCount integration or accounting workflow has been environment-tested.
+- On 2026-11-09, `npm run lint` and `npm run build:all` passed for the company-selection, nested-routing, and backend-configuration sample.
+- Local configuration checks confirmed three missing-company states without `.env`, one independently configured company with sample values, and no credential field names in the public-company serialization.
+- Production dependency audit reported no known vulnerabilities. Browser visual QA was not completed because the available embedded browser could not reach the Windows loopback preview server.
 
 ### Not implemented
 
-- Production UI, navigation, authentication, roles, or account-book selection.
-- Backend/Express application.
-- Configuration validation or secret management integration.
+- Portal-user authentication, roles, per-company authorization, and production-ready account-book selection.
+- Production secret-manager integration and live credential rotation.
 - AutoCount client or any API call.
 - Database schema, migrations, staging, mappings, jobs, audit, or queue.
 - Excel/CSV parsing and spreadsheet editing.
@@ -378,7 +384,7 @@ docs/
 - Import, bulk edit, cash book, purchase, knock-off, or history features.
 - Automated tests beyond the scaffold's lint/build tooling.
 
-The starter screen must not be interpreted as product functionality.
+The implemented pages are a navigation and configuration sample. Sector module tiles are placeholders and must not be interpreted as accounting functionality.
 
 ## 15. Important architectural decisions
 
@@ -390,11 +396,12 @@ The starter screen must not be interpreted as product functionality.
 - Financial writes require validation, review, verification, and audit.
 - Ambiguity blocks automation.
 - Context documentation must remain synchronized with implementation.
+- Keep the root Vite frontend and the TypeScript/Express backend under the repository-root `backend/` folder.
+- Treat each company/account book as an independent credential bundle even when multiple companies share an AutoCount registered account.
+- Keep the public route slug separate from backend AutoCount credentials and never return the root URL, Key ID, or API key to the browser.
 
 ### Proposed decisions awaiting implementation evidence
 
-- Keep the current root Vite frontend and place the entire backend under `backend/` rather than immediately converting to a complex monorepo.
-- Use TypeScript end-to-end.
 - Implement an adapter interface around AutoCount to make contract tests and safe mocks straightforward.
 - Use explicit workflow state machines and append-only audit events.
 - Introduce PostgreSQL in Phase 2 when persistent staging and job history are required.
