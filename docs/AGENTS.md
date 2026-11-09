@@ -6,9 +6,10 @@ Before changing code or project documentation:
 
 1. Read this file in full.
 2. Read `docs/context/PROJECT_CONTEXT.md` and `docs/context/IMPLEMENTATION_PLAN.md`.
-3. Inspect the current implementation and tests; do not infer status from plans alone.
-4. Check the working tree and preserve unrelated user changes.
-5. For any AutoCount operation, consult the current official documentation at <https://accounting-api.autocountcloud.com/documentation/> and the official Swagger reference at <https://accounting-api.autocountcloud.com/swagger/index.html>.
+3. Read `docs/context/loop/LOOP_OF_DEV_N_CONTEXT.md` and follow its code-and-manual synchronization workflow.
+4. Inspect the current implementation and tests; do not infer status from plans alone.
+5. Check the working tree and preserve unrelated user changes.
+6. For any AutoCount operation, consult the current official documentation at <https://accounting-api.autocountcloud.com/documentation/> and the official Swagger reference at <https://accounting-api.autocountcloud.com/swagger/index.html>.
 
 If implementation and documentation disagree, investigate the discrepancy. Update the documentation to describe reality; do not relabel planned work as complete.
 
@@ -161,6 +162,10 @@ Before handing off a change, run the relevant formatter/linter, type-check/build
 - Record important architectural decisions and their reasons in `docs/context/PROJECT_CONTEXT.md`.
 
 ## Context maintenance
+
+`docs/context/loop/LOOP_OF_DEV_N_CONTEXT.md` is the living project manual and a required companion to the code. Every development task that adds, changes, or removes a feature or behavior must update the affected manual sections before the task is complete. Updating another context document does not replace this requirement.
+
+For each affected page or shared workflow, keep the manual detailed enough that an AI with no prior conversation history can understand and safely continue development. Document the page's purpose, user-visible features, logic and business rules, important states and transitions, validation, data and API interactions, dependencies, permissions, error and edge-case behavior, limitations, and relevant implementation locations. Describe only behavior supported by the current code and tests, and keep planned behavior visibly separate.
 
 Whenever a session changes architecture, API usage, database design, core workflows, security requirements, or project scope:
 
