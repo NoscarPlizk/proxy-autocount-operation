@@ -8,7 +8,10 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 ## Planning principles
 
 - AutoCount remains the accounting system of record.
-- Start read-only and use a designated non-production account book for integration testing.
+- Start read-only and prefer a designated non-production account book for authorized programmer-performed manual live checks.
+- AI agents and automated tests must never call a real AutoCount endpoint or load live credentials; all automated coverage is mock/local-fixture only and must be unable to reach the vendor host.
+- Explain an API activation impact report before implementing or changing any AutoCount-connected backend path or interactive frontend trigger.
+- Treat live checks as human-only operations performed by an authorized programmer, with sanitized evidence returned for documentation.
 - Verify every endpoint and document behavior against current official documentation before implementation.
 - Process and record outcomes per accounting record unless an official atomic batch operation is verified.
 - Treat write timeouts as unknown outcomes requiring reconciliation.
@@ -29,6 +32,7 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 - [x] Create this phased implementation plan.
 - [x] Review the official API getting-started and relevant invoice/payment/knock-off documentation at a documentation level.
 - [x] Record documentation-verified facts separately from untested behavior.
+- [x] Record the human-only live API testing and interactive-control guardrail.
 - [ ] Confirm business owner answers to the highest-priority open questions.
 - [ ] Confirm a safe non-production AutoCount account book and access process.
 - [ ] Select initial application authentication and deployment direction.
@@ -67,12 +71,14 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 - Confirm non-production account book, account-book ID handling, and least-privilege API-key process.
 - Confirm application authentication requirements for the first internal release.
 - Review exact official models for account/customer/invoice listing operations.
-- Define configuration names, redaction policy, timeout policy, error taxonomy, and integration-test safety flags.
+- Define configuration names, redaction policy, timeout policy, error taxonomy, and automated-test isolation controls.
+- Define the technical denial that prevents automated tests and AI-run commands from loading live credentials or reaching the AutoCount vendor host.
 - Record an API contract note for each implemented endpoint: official URL, date reviewed, request, response, pagination, errors, permissions, and unverified behavior.
+- Produce and explain the API activation impact report, including every frontend control capable of triggering the backend path.
 
 #### Dependencies
 
-- Authorized read-only AutoCount credentials supplied outside source control.
+- Authorized read-only AutoCount credentials supplied outside source control and available only to the programmer performing the manual live check, never to automated tests or AI-run commands.
 - Test account book.
 - Decision on local/deployed secret storage.
 
@@ -80,7 +86,8 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 
 - Configuration rejects missing/invalid values without echoing secrets.
 - Logs and errors redact `API-Key` and `Key-ID`.
-- Integration-test guard refuses writes and refuses unapproved account books.
+- Automated test configuration refuses live credentials and vendor endpoints for reads and writes.
+- Frontend interaction tests use a fake backend and prove controls respect configuration, permission, confirmation, pending-state, and double-submit guards.
 
 #### Completion criteria
 
@@ -114,14 +121,14 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 - No frontend bundle contains AutoCount secrets or direct vendor URLs used for authenticated calls.
 - No write capability is reachable.
 
-### 1.3 Controlled connectivity check
+### 1.3 Programmer-controlled connectivity check
 
 #### Deliverables
 
 - Add a minimal administrator/development view for connection status, customer results, and invoice results.
-- Perform authorized read-only calls against the designated test account book.
+- Give an authorized programmer the reviewed manual procedure for approved read-only calls against the designated account book; AI and automated tooling must not execute those calls.
 - Capture sanitized evidence: result shapes, pagination behavior, errors, rate-limit headers, latency, permissions, and observed last-modified fields.
-- Update `docs/context/PROJECT_CONTEXT.md` from “documentation-verified” to “environment-tested” only for behaviors actually observed.
+- Update `docs/context/PROJECT_CONTEXT.md` from “documentation-verified” to “environment-tested” only for behavior the programmer manually observed and returned with the required operator/test conditions.
 
 #### Dependencies
 
@@ -130,13 +137,13 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 
 #### Tests
 
-- Read-only integration tests use explicit opt-in and a fixed approved account book.
-- Empty, multi-page, unauthorized, not-found, rate-limited, timeout, and malformed-response paths are covered by fixtures or safe tests.
+- Automated tests cannot load live credentials, resolve the vendor host, or select a real account book.
+- Empty, multi-page, unauthorized, not-found, rate-limited, timeout, and malformed-response paths are covered exclusively by mocks/local fixtures.
 - Frontend renders errors without crashing the whole application.
 
 #### Completion criteria
 
-- Customer and invoice data can be retrieved read-only through the backend.
+- The authorized programmer has manually confirmed that customer and invoice data can be retrieved read-only through the backend, or the milestone remains explicitly unverified.
 - Pagination and error behavior are understood enough for the next phase.
 - Credentials remain secret, and the observed behavior is documented.
 
@@ -244,7 +251,7 @@ Phase 2 should begin with one agreed use case—likely sales invoices—but the 
 
 - Phase 2.3 complete.
 - Exact create endpoint and response/error behavior reviewed.
-- Controlled test plan and write-enabled least-privilege test key.
+- Owner-reviewed human-only manual test plan and a write-enabled least-privilege key unavailable to AI and automated tests.
 
 #### Tests
 
@@ -253,11 +260,12 @@ Phase 2 should begin with one agreed use case—likely sales invoices—but the 
 - Double-submit race tests.
 - Partial success, rate limit, transient failure, permanent validation failure, timeout-before-send, timeout-after-send, and process-restart recovery.
 - Verification mismatch and duplicate-reconciliation tests.
-- Controlled test-account writes using uniquely identifiable disposable test data and documented cleanup/reconciliation.
+- Mock-only automated coverage for write outcomes; no automated test may call AutoCount.
+- Separately, an authorized programmer follows the owner-approved manual write procedure using explicitly identified records, stop conditions, and documented verification/cleanup/reconciliation.
 
 #### Completion criteria
 
-- One document type can complete the full workflow in a test account with independent, verified outcomes.
+- One document type can complete the mock-covered workflow; any real AutoCount outcome is verified only through an authorized programmer's documented manual check.
 - No production write is enabled until owner acceptance and an operational runbook exist.
 - Recovery from every tested failure mode is understood and documented.
 
@@ -318,7 +326,7 @@ Phase 2 should begin with one agreed use case—likely sales invoices—but the 
 
 #### Completion criteria
 
-- A controlled batch of at least 20 test-account edits yields 20 individually verified outcomes.
+- Mock coverage proves multi-record behavior; any real edit count and target records are approved per ticket and executed manually by an authorized programmer rather than fixed as an automated batch requirement.
 - No omitted or reordered detail data is observed.
 - Failure recovery excludes successful and unresolved-unknown records.
 
@@ -344,7 +352,7 @@ Phase 2 should begin with one agreed use case—likely sales invoices—but the 
 
 #### Completion criteria
 
-- End-to-end test-account purchase workflow passes with documented reconciliation.
+- The mock end-to-end purchase workflow passes; any real AutoCount check is manually performed by an authorized programmer with documented reconciliation.
 
 ### 4.2 Cash book
 
@@ -366,7 +374,7 @@ Phase 2 should begin with one agreed use case—likely sales invoices—but the 
 
 #### Completion criteria
 
-- Each cash book transaction class is correctly distinguished and tested in the safe account book.
+- Each cash book transaction class is correctly distinguished in mock coverage; any safe-account-book check is manually performed by an authorized programmer.
 
 ### 4.3 Knock-off and payment allocation
 
@@ -392,7 +400,7 @@ Phase 2 should begin with one agreed use case—likely sales invoices—but the 
 #### Completion criteria
 
 - No allocation can exceed or act on stale outstanding balances.
-- Test-account allocations reconcile to expected remaining balances.
+- Mock allocation scenarios reconcile to expected remaining balances; any real-account-book allocation check is manually performed by an authorized programmer under a separately approved high-risk procedure.
 - Operational review approves production readiness separately.
 
 ## Phase 5 — Advanced productivity and integration
@@ -430,28 +438,32 @@ Phase 2 should begin with one agreed use case—likely sales invoices—but the 
 
 ## Cross-phase quality gates
 
-Every phase that introduces or changes an accounting write must pass all applicable gates:
+Every phase that introduces or changes an AutoCount-connected read, write, or interactive trigger must pass all applicable gates:
 
 1. **Documentation gate:** exact official endpoint/model/restrictions reviewed and recorded.
-2. **Test-environment gate:** designated non-production account book and least-privilege key confirmed.
-3. **Validation gate:** required data, dependencies, duplicates, and financial rules pass.
-4. **Review gate:** immutable proposed change and authorized confirmation exist.
-5. **Concurrency gate:** stale records and duplicate batch submission are blocked.
-6. **Payload gate:** request builder is document-specific and contract-tested.
-7. **Execution gate:** bounded processing and per-record state/outcomes exist.
-8. **Unknown-outcome gate:** timeouts cannot trigger blind retry.
-9. **Verification gate:** remote result is retrieved/reconciled before final success.
-10. **Recovery gate:** partial failure and restart procedures are tested.
-11. **Audit gate:** actor, account book, target, before/proposed data, timestamps, and sanitized outcomes are traceable.
-12. **Documentation gate:** implementation status, decisions, limitations, and next work are updated.
+2. **Activation-impact gate:** frontend trigger, backend path, endpoint, data scope, permissions, processing/timing, risks, and safeguards are explained to the owner before implementation.
+3. **Automation-isolation gate:** automated tests and AI-run commands cannot load live credentials, resolve/reach the vendor host, or select a real account book.
+4. **Human-live-test gate:** any live check has an owner-reviewed manual procedure and is executed only by an authorized programmer with sanitized evidence.
+5. **Frontend-action gate:** account-book context, consequence, permissions, confirmation, single-submit protection, and truthful result states are enforced for every interactive trigger.
+6. **Validation gate:** required data, dependencies, duplicates, and financial rules pass.
+7. **Review gate:** immutable proposed change and authorized confirmation exist.
+8. **Concurrency gate:** stale records and duplicate batch submission are blocked.
+9. **Payload gate:** request builder is document-specific and contract-tested against mocks/fixtures.
+10. **Execution gate:** bounded processing and per-record state/outcomes exist.
+11. **Unknown-outcome gate:** timeouts cannot trigger blind retry.
+12. **Verification gate:** remote result is retrieved/reconciled before final success during real operations.
+13. **Recovery gate:** partial failure and restart procedures are mock-tested and manually validated only where explicitly approved.
+14. **Audit gate:** actor, account book, target, before/proposed data, timestamps, and sanitized outcomes are traceable.
+15. **Documentation gate:** implementation status, decisions, limitations, and next work are updated.
 
 ## Immediate next milestone
 
-The next recommended development task is Phase 1's read-only connectivity slice: add the minimal backend and centralized AutoCount adapter, then retrieve customer and invoice listings from an approved test account book. Do not implement create/update/delete/void operations in that milestone.
+The next recommended development task is Phase 1's read-only connectivity slice: add the minimal backend and centralized AutoCount adapter, cover customer and invoice listings using mocks/local fixtures, and prepare a manual connectivity checklist for an authorized programmer. AI and automated tests must not retrieve data from a real AutoCount account book. Do not implement create/update/delete/void operations in that milestone.
 
 Before coding it, obtain decisions or safe defaults for:
 
-- non-production account-book availability and ID;
+- non-production account-book availability and ID, or the narrowly approved real account book for a programmer-performed manual read-only check;
+- the authorized programmer who will execute live checks and return sanitized evidence;
 - approved handling of the read-only key;
 - initial application authentication for the development view; and
 - the runtime validation, HTTP-client, and test libraries.

@@ -37,7 +37,7 @@ This application must not:
 
 Use these sources in order:
 
-1. Observed behavior from an authorized, controlled test against a non-production account book, recorded with the test conditions.
+1. Observed behavior from an authorized programmer's manual, controlled live check, preferably against a non-production account book, recorded with the operator and full test conditions.
 2. Current official AutoCount documentation and Swagger definitions.
 3. Repository decisions and requirements in `docs/context/PROJECT_CONTEXT.md`.
 4. Explicitly labelled design proposals and assumptions.
@@ -146,7 +146,26 @@ Use tests proportionate to financial risk. At minimum, add automated coverage fo
 - batch concurrency protection and state transitions; and
 - permissions for review, approval, and submission.
 
-Use mocked/contract fixtures for routine tests. Integration tests must default to read-only and use a designated non-production account book. Production writes are never an ordinary test step.
+Use mocked/contract fixtures for all automated AutoCount tests. AI agents, test runners, CI jobs, browser automation, scripts, and other automated processes must never execute requests against a real AutoCount endpoint or account book, including read-only requests. They must not load live AutoCount credentials and must be structurally prevented from reaching the vendor host. Production writes are never a test step.
+
+## Human-only live API and interactive-control guardrail
+
+Any live AutoCount check is performed manually by an authorized programmer. An AI may inspect official documentation, implement the adapter or workflow, create mock-only tests, and prepare a manual procedure, but it must stop before executing a live request. This applies to GET as well as create, update, delete, void, approval, allocation, knock-off, and every other AutoCount operation. If no sandbox or non-production account book exists, do not weaken the rule or use production to discover behavior.
+
+Before implementing or changing any AutoCount-connected backend path or any frontend control that can trigger one, explain an API activation impact report to the project owner. At minimum, identify:
+
+- the frontend action and complete route/use-case/adapter/HTTP-endpoint trigger chain;
+- read/write/destructive classification and exact account-book, record, filter, and field scope;
+- documented request, response, permission, validation, timing, timeout, rate-limit, concurrency, and retry behavior;
+- feature gates, authorization, confirmation, double-submit protection, audit, verification, failure, unknown-outcome, reconciliation, and reversibility controls;
+- mock-only automated coverage and the mechanism that prevents live network or credential use; and
+- the authorized programmer's exact manual test procedure, stop conditions, and required sanitized evidence.
+
+Do not promise exact external API duration without evidence. State documented limits, programmer-measured observations, estimates, configured timeouts, and unknowns separately.
+
+Buttons, links, forms, keyboard shortcuts, bulk actions, retry controls, and automatic UI effects that can initiate AutoCount work are part of the accounting safety boundary. They must show the selected company/account book and consequence, remain unavailable until configuration/permission/validation/review gates pass, prevent accidental duplicate activation, use confirmation proportional to risk, and display verified pending/success/failure/partial/conflict/unknown states. Presentation-only controls must not appear operational.
+
+Only programmer-supplied, sanitized evidence from a manual live check may change a capability to **Environment-tested**. Record the operator, date/time, account book/environment, endpoint and method, target scope, sanitized request shape, expected effect, actual duration, outcome, verification, and cleanup/reconciliation. Never claim AI or automated verification of a real AutoCount behavior.
 
 Before handing off a change, run the relevant formatter/linter, type-check/build, and tests. Report anything that could not run.
 
@@ -184,7 +203,7 @@ Use precise labels:
 - **Confirmed requirement** — explicitly required by the project owner.
 - **Proposed decision** — recommended design, not yet accepted through implementation or explicit approval.
 - **Documentation-verified** — supported by current official documentation but not necessarily tested with company credentials.
-- **Environment-tested** — observed in an authorized test, with account type/date noted.
+- **Environment-tested** — observed in an authorized programmer-performed manual live check, with operator, account book/environment, date/time, target scope, and verification evidence noted.
 - **Implemented** — code exists in this repository.
 - **Tested** — the named automated or controlled test passed.
 - **Unverified assumption** — requires documentation review, vendor clarification, or controlled testing.
