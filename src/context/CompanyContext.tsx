@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { getCompanies } from '../api/companyApi'
-import type { PortalCompany } from '../types/company'
+import { getCompanyDirectory } from '../api/companyApi'
+import type { PortalCompany, PortalCompanyDirectory } from '../types/company'
 
 interface CompanyContextValue {
   companies: PortalCompany[]
+  companyFileCount: number
+  configuredCompanyCount: number
   isLoading: boolean
   error: string | null
   findCompany: (slug: string | undefined) => PortalCompany | undefined
@@ -12,15 +14,19 @@ interface CompanyContextValue {
 const CompanyContext = createContext<CompanyContextValue | null>(null)
 
 export function CompanyProvider({ children }: { children: ReactNode }) {
-  const [companies, setCompanies] = useState<PortalCompany[]>([])
+  const [directory, setDirectory] = useState<PortalCompanyDirectory>({
+    companies: [],
+    companyFileCount: 0,
+    configuredCompanyCount: 0,
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
-    getCompanies(controller.signal)
+    getCompanyDirectory(controller.signal)
       .then((result) => {
-        setCompanies(result)
+        setDirectory(result)
         setError(null)
       })
       .catch((requestError: unknown) => {
@@ -32,11 +38,11 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo<CompanyContextValue>(() => ({
-    companies,
+    ...directory,
     isLoading,
     error,
-    findCompany: (slug) => companies.find((company) => company.slug === slug),
-  }), [companies, error, isLoading])
+    findCompany: (slug) => directory.companies.find((company) => company.slug === slug),
+  }), [directory, error, isLoading])
 
   return <CompanyContext.Provider value={value}>{children}</CompanyContext.Provider>
 }

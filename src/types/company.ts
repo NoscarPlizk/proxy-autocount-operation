@@ -12,3 +12,9 @@ export interface PortalCompany {
   statusMessage: string
   accent: string
 }
+
+export interface PortalCompanyDirectory {
+  companies: PortalCompany[]
+  companyFileCount: number
+  configuredCompanyCount: number
+}

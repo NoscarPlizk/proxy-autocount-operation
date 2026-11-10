@@ -29,14 +29,14 @@ Use the status labels defined in `docs/AGENTS.md`. Do not describe planned or un
 
 ## Shared workflow: company configuration and isolation
 
-- **Primary implementation:** `backend/src/config/company-config.ts`, `backend/src/routes/company-routes.ts`, `backend/src/server.ts`, `backend/.env.example`, `src/context/CompanyContext.tsx`, and `src/api/companyApi.ts`.
-- **Status:** **Implemented and locally tested** for environment-presence validation and safe public serialization. No AutoCount credential has been supplied and no vendor call has been environment-tested.
-- The backend defines three independent portal companies: `company-one`, `company-two`, and `company-three`. Public names are placeholders until the owner supplies final names.
-- One ignored `backend/.env` is expected to contain a root URL, Key ID, and API key for each company. The committed `.env.example` contains placeholders only.
-- The first two companies remain independent credential bundles even if they share an AutoCount registered/master account. The third standalone company uses the same configuration shape.
+- **Primary implementation:** `backend/src/config/company-config.ts`, `backend/src/routes/company-routes.ts`, `backend/src/server.ts`, `backend/company-accounts/`, `src/context/CompanyContext.tsx`, and `src/api/companyApi.ts`.
+- **Status:** **Implemented and locally tested** for directory discovery, environment-presence validation, rescanning, and safe public serialization. No AutoCount credential has been supplied and no vendor call has been environment-tested.
+- The backend scans `backend/company-accounts/` and defines one portal company for every file ending in `.env`. Non-environment files and the committed `.env.example` template are not counted.
+- Each ignored company file independently contains `AUTOCOUNT_ROOT_URL`, `AUTOCOUNT_KEY_ID`, and `AUTOCOUNT_API_KEY`; the shorter `ROOT_URL`, `KEY_ID`, and `API_KEY` aliases are also accepted. The filename derives the public display name and stable route slug.
+- Credential files remain independent even when companies share an AutoCount registered/master account. `backend/.env` is reserved for local process settings such as host and port.
 - A company is `configured` only when all three values exist, contain no recognized placeholder markers, and the root URL is an HTTPS URL with a path. No live authentication check is made.
 - With no values, status is `configuration_missing`; partial, placeholder, malformed, non-HTTPS, or root-only values produce `configuration_invalid`.
-- `GET /api/companies` returns safe display metadata, route slug, presentation accent, configuration status, and a safe status message. It never returns the root URL, Key ID, API key, or environment-variable prefix.
+- `GET /api/companies` rescans the directory and returns safe display metadata, route slug, presentation accent, configuration status, company-file count, configured-company count, and a safe status message. It never returns the root URL, Key ID, API key, configuration filename, or environment-variable names.
 - `GET /api/companies/:companySlug` returns one safe company record or a normalized 404 response. `GET /api/health` reports process health and counts, not credentials.
 - Vite proxies `/api` to the local Express backend on `127.0.0.1:3001`. The backend binds to loopback by default.
 - The configuration status only proves local values are present and structurally plausible; it does not prove AutoCount accepted them or that permissions are sufficient.
@@ -46,15 +46,16 @@ Use the status labels defined in `docs/AGENTS.md`. Do not describe planned or un
 ## Page: company selection
 
 - **Route:** `/`
-- **Purpose:** first-layer selection of one of the three configured company workspaces.
+- **Purpose:** first-layer selection of the company workspaces discovered from backend company-account files.
 - **Primary implementation:** `src/pages/CompanySelectionPage.tsx`, with shared data loading in `src/context/CompanyContext.tsx` and presentation in `src/App.css`.
 - **Status:** **Implemented and build-tested**. Browser visual QA is incomplete because the available embedded browser could not reach the local Windows preview server.
 
 ### Features and behavior
 
-- Loads company metadata once from `GET /api/companies` when the provider mounts.
-- Displays a card for each backend-defined company with initials, display name, local configuration status, status explanation, and workspace link.
-- Configured cards use “Open company”; unconfigured or invalid cards use “Preview workspace.” Preview access is allowed because the current sector pages contain no live accounting action.
+- Loads company metadata once from `GET /api/companies` when the provider mounts; reloading the portal rescans the backend directory.
+- Displays the number of accessible company accounts and detected configuration files.
+- Displays a card for each discovered `.env` file with filename-derived initials and display name, local configuration status, status explanation, and workspace state.
+- Configured cards use an active “Open company” link. Missing or invalid configuration files use a disabled “Complete configuration” control, and direct workspace navigation is blocked.
 - Selecting a card navigates to `/companies/:companySlug` and does not place AutoCount credentials in the URL or browser state.
 - Displays a loading panel while the backend request is pending and a visible error panel if the backend is unavailable.
 - Company data is not persisted in browser storage. Reloading fetches fresh backend metadata.
@@ -62,7 +63,7 @@ Use the status labels defined in `docs/AGENTS.md`. Do not describe planned or un
 
 ### Limitations
 
-- All three company cards are visible because user authentication and company authorization have not been implemented.
+- Every discovered company card is visible because user authentication and per-user company authorization have not been implemented.
 - The “Need help?” element is presentation-only.
 - Status is based on local configuration validation, not a live AutoCount connection test.
 
@@ -132,3 +133,6 @@ Use the status labels defined in `docs/AGENTS.md`. Do not describe planned or un
 - Added the mandatory API activation impact report and programmer-only manual evidence requirements.
 - Extended the guardrail to every interactive frontend control capable of triggering an AutoCount-connected backend workflow.
 - Synchronized `docs/AGENTS.md`, `docs/context/PROJECT_CONTEXT.md`, `docs/context/IMPLEMENTATION_PLAN.md`, and this manual. No application code or AutoCount data was changed.
+- Replaced the three hard-coded company bundles with directory-based discovery of independent ignored `.env` files.
+- Added safe counts, an empty-directory state, credential-validation gating, and direct-route blocking for incomplete company files.
+- Added mock-only backend tests for empty, valid, invalid, newly added, ignored non-`.env`, and secret-redaction behavior. No AutoCount request was made.

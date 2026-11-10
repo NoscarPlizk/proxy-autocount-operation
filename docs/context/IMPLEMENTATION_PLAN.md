@@ -62,7 +62,7 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 
 **Goal:** prove secure backend connectivity and normalize read behavior without changing accounting records.
 
-**Implementation note (2026-11-09):** the repository now contains the initial TypeScript/Express process, health and safe company-metadata routes, three independent server-only configuration bundles, and the company-selection/nested-routing UI. This is a foundation sample only. Portal authentication, a centralized AutoCount adapter, live read calls, contract tests, and controlled non-production connectivity remain incomplete.
+**Implementation note (2026-11-10):** the repository now contains the initial TypeScript/Express process, health and safe company-metadata routes, dynamic discovery of independent server-only company credential files, and the company-selection/nested-routing UI. Local mock-only tests cover discovery, validation, rescanning, and public serialization. This is a foundation sample only. Portal authentication, a centralized AutoCount adapter, live read calls, adapter contract tests, and controlled non-production connectivity remain incomplete.
 
 ### 1.1 Requirements and design
 

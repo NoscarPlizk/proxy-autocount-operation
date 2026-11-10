@@ -1,6 +1,6 @@
 # AutoCount Operations Proxy
 
-Local React and Express sample for selecting one of three AutoCount companies and keeping that company in every nested portal route.
+Local React and Express sample that discovers AutoCount company accounts from separate backend environment files and keeps the selected company in every nested portal route.
 
 ## Current sample
 
@@ -9,24 +9,26 @@ Local React and Express sample for selecting one of three AutoCount companies an
 - `/companies/:companySlug/sales` — Sales sector.
 - `/companies/:companySlug/purchase` — Purchase sector.
 - `/companies/:companySlug/accounting` — Accounting sector.
-- `GET /api/companies` — safe company metadata and local configuration status.
-- `GET /api/health` — backend health and configured-company count.
+- `GET /api/companies` — safe company metadata, discovered-file count, and local configuration status.
+- `GET /api/health` — backend health, company-file count, and configured-company count.
 
 This sample does not call AutoCount or perform accounting reads/writes yet. It only validates whether each company has all three required environment values.
 
 ## Environment setup
 
-Copy `backend/.env.example` to `backend/.env`, then replace the placeholders for each company:
+Keep process settings such as `HOST` and `PORT` in `backend/.env` when needed. Company credentials belong in separate files under `backend/company-accounts/`.
+
+Copy `backend/company-accounts/company-name.env.example` to a descriptive filename ending in `.env`, such as `acme-trading.env`, and replace all three placeholders:
 
 ```dotenv
-AUTOCOUNT_COMPANY_ONE_ROOT_URL=https://accounting-api.autocountcloud.com/<account-book-id>
-AUTOCOUNT_COMPANY_ONE_KEY_ID=<key-id>
-AUTOCOUNT_COMPANY_ONE_API_KEY=<api-key>
+AUTOCOUNT_ROOT_URL=https://accounting-api.autocountcloud.com/<account-book-id>
+AUTOCOUNT_KEY_ID=<key-id>
+AUTOCOUNT_API_KEY=<api-key>
 ```
 
-Repeat for Company Two and Company Three in the same file. Keep the actual `backend/.env` private. It is ignored by Git and must never be prefixed with `VITE_` or copied into frontend code.
+Create one file per company/account book. The filename is converted into the public name and route slug: `acme-trading.env` becomes “Acme Trading” at `/companies/acme-trading`. Reload the first portal page after adding a file.
 
-Company display names and public slugs are currently placeholders in `backend/src/config/company-config.ts`. They can be replaced when the real names are confirmed without putting credentials in source code.
+Actual files in `backend/company-accounts/*.env` are ignored by Git. Never prefix these values with `VITE_` or copy them into frontend code.
 
 ## Run locally
 
@@ -43,8 +45,9 @@ The Vite frontend proxies `/api` requests to the local backend on `http://127.0.
 ```powershell
 npm run lint
 npm run build:all
+npm --prefix backend test
 ```
 
 ## Security boundary
 
-The backend never returns the root URL, Key ID, API key, or environment-variable names to the browser. Portal-user authentication and live AutoCount endpoint calls are deliberately deferred; do not expose this sample publicly with real credentials until authentication and authorization are implemented.
+The backend rescans the company-account directory for each metadata request but never returns the root URL, Key ID, API key, configuration filename, or environment-variable names to the browser. A company workspace link is enabled only after local structural validation. This does not authenticate against AutoCount. Portal-user authentication and live AutoCount endpoint calls are deliberately deferred; do not expose this sample publicly with real credentials until authentication and authorization are implemented.

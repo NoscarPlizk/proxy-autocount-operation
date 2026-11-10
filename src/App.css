@@ -12,8 +12,11 @@
 .kicker { margin:0 0 13px; color:var(--blue); font-size:.76rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase }
 .selection-intro h1,.page-header h1,.not-found h1 { margin:0; color:var(--ink); letter-spacing:-.045em }
 .selection-intro h1 { font-size:clamp(2.3rem,5vw,3.55rem); line-height:1.04 }
-.selection-intro p:last-child { max-width:590px; margin:20px auto 0; color:var(--muted); font-size:1rem; line-height:1.7 }
-.company-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px }
+.selection-description { max-width:590px; margin:20px auto 0; color:var(--muted); font-size:1rem; line-height:1.7 }
+.selection-intro .company-count { display:flex; width:fit-content; margin:22px auto 0; padding:9px 13px; border:1px solid var(--line); border-radius:999px; align-items:center; gap:5px; color:var(--ink); background:rgba(255,255,255,.82); font-size:.76rem; line-height:1.3 }
+.company-count strong { color:var(--blue); font-size:.86rem }
+.company-count span { margin-left:5px; padding-left:10px; border-left:1px solid var(--line); color:var(--muted) }
+.company-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px }
 .company-card { position:relative; overflow:hidden; min-height:276px; padding:26px; border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.94); box-shadow:var(--shadow-sm); transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease }
 .company-card::before { position:absolute; top:0; right:0; left:0; height:3px; content:""; background:var(--company-accent,var(--blue)); opacity:0; transition:opacity .18s ease }
 .company-card:hover { border-color:#cad4ed; box-shadow:var(--shadow-lg); transform:translateY(-4px) }
@@ -31,8 +34,15 @@
 .company-action,.primary-link { display:inline-flex; min-height:42px; border-radius:10px; align-items:center; justify-content:center; text-decoration:none; font-size:.82rem; font-weight:750; transition:background .16s ease,color .16s ease }
 .company-action { width:100%; gap:8px; margin-top:23px; color:#fff; background:var(--navy) }
 .company-action:hover,.primary-link:hover { background:var(--blue-dark) }
+.company-action-disabled { cursor:not-allowed; color:#8c96aa; background:#edf0f5 }
+.company-action-disabled:hover { background:#edf0f5 }
 .selection-error,.loading-panel { max-width:700px; margin:0 auto; padding:22px; border:1px solid #f1cccc; border-radius:14px; color:var(--red); background:var(--red-light); text-align:center }
 .loading-panel { border-color:var(--line); color:var(--muted); background:var(--surface) }
+.empty-company-state { max-width:620px; margin:0 auto; padding:42px 28px; border:1px dashed #cbd3e2; border-radius:17px; color:var(--muted); background:rgba(255,255,255,.72); text-align:center }
+.empty-company-state>.icon { display:grid; width:46px; height:46px; margin:0 auto 14px; border-radius:13px; place-items:center; color:var(--blue); background:var(--blue-light) }
+.empty-company-state strong { display:block; color:var(--ink); font-size:.95rem }
+.empty-company-state p { margin:8px 0 0; font-size:.8rem; line-height:1.6 }
+.empty-company-state code { color:var(--ink); font-family:ui-monospace,SFMono-Regular,Consolas,monospace }
 .portal-shell { display:grid; min-height:100vh; grid-template-columns:252px minmax(0,1fr); background:var(--canvas) }
 .sidebar { position:sticky; top:0; display:flex; height:100vh; padding:25px 18px 20px; flex-direction:column; color:#ced5e5; background:var(--navy) }
 .sidebar .brand-name { color:#fff }

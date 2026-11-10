@@ -17,7 +17,7 @@ export function CompanyDashboardPage() {
       </div></div>
 
       {company.status !== 'configured' && (
-        <div className="setup-callout"><Icon name="settings" size={20} /><div><strong>AutoCount connection not configured.</strong>{' '}Add this company’s root URL, Key ID, and API key to backend/.env before enabling live operations.</div></div>
+        <div className="setup-callout"><Icon name="settings" size={20} /><div><strong>AutoCount connection not configured.</strong>{' '}Complete this company’s file in backend/company-accounts before enabling live operations.</div></div>
       )}
 
       <section className="sector-grid" aria-label="Accounting sectors">

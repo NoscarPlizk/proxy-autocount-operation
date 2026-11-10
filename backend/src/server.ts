@@ -14,6 +14,7 @@ app.get('/api/health', (_request, response) => {
   response.json({
     status: 'ok',
     configuredCompanies: companies.filter((company) => company.status === 'configured').length,
+    companyFiles: companies.length,
     totalCompanies: companies.length,
   })
 })

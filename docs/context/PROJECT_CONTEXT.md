@@ -1,7 +1,7 @@
 # AutoCount Operations Proxy — Project Context
 
 **Context version:** 2026-11-10
-**Implementation status reviewed:** 2026-11-09  
+**Implementation status reviewed:** 2026-11-10
 **Official API documentation reviewed:** 2026-11-09
 
 This is the primary durable context for the project. Future development sessions must read it together with the repository implementation, `docs/AGENTS.md`, and `docs/context/IMPLEMENTATION_PLAN.md`.
@@ -321,6 +321,7 @@ validation/matching      job processor
 ```text
 src/                         React application (already present)
 backend/                     exclusive root for all backend code
+  company-accounts/            ignored per-company `.env` credential files and committed template
   src/
     config/                  validated backend configuration
     http/                    Express setup, middleware, controllers
@@ -396,10 +397,11 @@ docs/
 ### Implemented
 
 - A React 19 + TypeScript + Vite portal exists at the repository root with React Router nested routes.
-- The first layer at `/` retrieves safe company metadata from the backend and displays three company choices with local configuration status.
+- The first layer at `/` retrieves safe company metadata from the backend and displays one company choice per discovered `backend/company-accounts/*.env` file.
 - The second layer uses `/companies/:companySlug` and nested Sales, Purchase, and Accounting routes so company context remains in the URL.
 - A TypeScript/Express backend exists under `backend/` with health and safe company-metadata routes.
-- Three separate AutoCount configuration bundles are modeled in one backend-only `.env`; each bundle requires a root URL, Key ID, and API key. Only a placeholder `backend/.env.example` is committed.
+- Each AutoCount company/account book is modeled by one ignored backend-only file in `backend/company-accounts/`; each file requires a root URL, Key ID, and API key. A placeholder template and setup instructions are committed in that directory.
+- Company public names, initials, accents, and route slugs are derived from environment filenames. The backend rescans the directory for each metadata request, returns safe file/configuration counts, and never serializes credentials or filenames.
 - Missing, partial, placeholder, non-HTTPS, and root-only URL configurations are classified without returning secrets to the browser.
 - ESLint and frontend/backend TypeScript build scripts exist.
 - Project initialization context is captured in `docs/AGENTS.md`, this file, and `docs/context/IMPLEMENTATION_PLAN.md`.
@@ -407,8 +409,8 @@ docs/
 ### Tested
 
 - No AutoCount integration or accounting workflow has been environment-tested.
-- On 2026-11-09, `npm run lint` and `npm run build:all` passed for the company-selection, nested-routing, and backend-configuration sample.
-- Local configuration checks confirmed three missing-company states without `.env`, one independently configured company with sample values, and no credential field names in the public-company serialization.
+- On 2026-11-10, `npm run lint`, `npm run build:all`, and `npm --prefix backend test` passed for dynamic company discovery, company-selection gating, nested routing, and backend configuration.
+- Local mock-only configuration tests confirmed an empty directory returns zero companies, each `.env` file produces one safe company record, invalid files remain blocked, newly added files are found on the next scan, and no credential value is present in public serialization.
 - Production dependency audit reported no known vulnerabilities. Browser visual QA was not completed because the available embedded browser could not reach the Windows loopback preview server.
 
 ### Not implemented
@@ -435,7 +437,7 @@ The implemented pages are a navigation and configuration sample. Sector module t
 - Ambiguity blocks automation.
 - Context documentation must remain synchronized with implementation.
 - Keep the root Vite frontend and the TypeScript/Express backend under the repository-root `backend/` folder.
-- Treat each company/account book as an independent credential bundle even when multiple companies share an AutoCount registered account.
+- Treat each company/account book as an independent credential file under `backend/company-accounts/`, even when multiple companies share an AutoCount registered account.
 - Keep the public route slug separate from backend AutoCount credentials and never return the root URL, Key ID, or API key to the browser.
 - AI agents and automated tests may use only mocks/local fixtures and must never execute live AutoCount requests; live checks are performed manually by an authorized programmer.
 - Require an API activation impact report and owner explanation before implementing or changing any AutoCount-connected backend path or interactive frontend trigger.

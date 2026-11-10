@@ -1,12 +1,7 @@
-import type { PortalCompany } from '../types/company'
+import type { PortalCompanyDirectory } from '../types/company'
 
-interface CompanyListResponse {
-  companies: PortalCompany[]
-}
-
-export async function getCompanies(signal?: AbortSignal): Promise<PortalCompany[]> {
+export async function getCompanyDirectory(signal?: AbortSignal): Promise<PortalCompanyDirectory> {
   const response = await fetch('/api/companies', { signal })
   if (!response.ok) throw new Error('The company service is not available.')
-  const payload = (await response.json()) as CompanyListResponse
-  return payload.companies
+  return (await response.json()) as PortalCompanyDirectory
 }

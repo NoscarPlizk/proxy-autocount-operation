@@ -15,6 +15,7 @@ export function CompanyLayout() {
 
   if (isLoading) return <div className="not-found"><p>Loading company…</p></div>
   if (!company || !companySlug) return <NotFoundPage message="This company is not in the portal configuration." />
+  if (company.status !== 'configured') return <NotFoundPage message="This company account is not ready. Complete its environment configuration before opening the workspace." />
 
   const pathSection = location.pathname.split('/').filter(Boolean).at(-1)
   const currentSection = sectors.find((sector) => sector.key === pathSection)?.title ?? 'Overview'
