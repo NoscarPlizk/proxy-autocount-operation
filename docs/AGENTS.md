@@ -5,11 +5,11 @@
 Before changing code or project documentation:
 
 1. Read this file in full.
-2. Read `docs/context/PROJECT_CONTEXT.md` and `docs/context/IMPLEMENTATION_PLAN.md`.
+2. Read `docs/context/AUTOCOUNT_API_CONTEXT.md`, `docs/context/PROJECT_CONTEXT.md`, and `docs/context/IMPLEMENTATION_PLAN.md`.
 3. Read `docs/context/loop/LOOP_OF_DEV_N_CONTEXT.md` and follow its code-and-manual synchronization workflow.
 4. Inspect the current implementation and tests; do not infer status from plans alone.
 5. Check the working tree and preserve unrelated user changes.
-6. For any AutoCount operation, consult the current official documentation at <https://accounting-api.autocountcloud.com/documentation/> and the official Swagger reference at <https://accounting-api.autocountcloud.com/swagger/index.html>.
+6. For any AutoCount operation, consult the current official documentation at <https://accounting-api.autocountcloud.com/documentation/> and the official Swagger reference at <https://accounting-api.autocountcloud.com/swagger/index.html>. Follow the source-of-truth and documentation-review rules in `docs/context/AUTOCOUNT_API_CONTEXT.md`.
 
 If implementation and documentation disagree, investigate the discrepancy. Update the documentation to describe reality; do not relabel planned work as complete.
 
@@ -35,12 +35,12 @@ This application must not:
 
 ## Source-of-truth hierarchy
 
-Use these sources in order:
+For published API rules and contracts, use these sources in order:
 
-1. Observed behavior from an authorized programmer's manual, controlled live check, preferably against a non-production account book, recorded with the operator and full test conditions.
-2. Current official AutoCount documentation and Swagger definitions.
-3. Repository decisions and requirements in `docs/context/PROJECT_CONTEXT.md`.
-4. Explicitly labelled design proposals and assumptions.
+1. Current official AutoCount documentation and Swagger definitions, interpreted according to `docs/context/AUTOCOUNT_API_CONTEXT.md`.
+2. Repository decisions and requirements in `docs/context/PROJECT_CONTEXT.md`, which may be stricter but must not weaken official requirements.
+3. Observed behavior from an authorized programmer's manual, controlled live check, preferably against a non-production account book, recorded with the operator and full test conditions. This establishes environment-specific evidence but does not override the official contract.
+4. Explicitly labelled design proposals and assumptions, which never establish API rules.
 
 When sources conflict, stop write-path work, record the conflict, and resolve it before continuing. Never use an assumption to authorize a financial write.
 

@@ -1,10 +1,10 @@
 # AutoCount Operations Proxy — Project Context
 
-**Context version:** 2026-11-10
+**Context version:** 2026-11-11
 **Implementation status reviewed:** 2026-11-10
-**Official API documentation reviewed:** 2026-11-09
+**Official API documentation reviewed:** 2026-11-11
 
-This is the primary durable context for the project. Future development sessions must read it together with the repository implementation, `docs/AGENTS.md`, and `docs/context/IMPLEMENTATION_PLAN.md`.
+This is the primary durable context for the project. Future development sessions must read it together with the repository implementation, `docs/AGENTS.md`, `docs/context/AUTOCOUNT_API_CONTEXT.md`, and `docs/context/IMPLEMENTATION_PLAN.md`.
 
 ## 1. Project overview and business motivation
 
@@ -245,7 +245,9 @@ This is a high-risk module and must not be the first write implementation.
 
 ## 10. AutoCount API integration knowledge
 
-### 10.1 Documentation-verified as of 2026-11-09
+`docs/context/AUTOCOUNT_API_CONTEXT.md` is the mandatory entry point for AutoCount API work. The current official documentation at <https://accounting-api.autocountcloud.com/documentation/> is the source of truth for published API rules, with the official Swagger reference as its technical supplement. The facts below are dated summaries only; re-check the exact current official endpoint, field-format, and data-model pages before relying on them.
+
+### 10.1 Documentation-verified as of 2026-11-11
 
 The following statements are supported by the official documentation reviewed during initialization. They are not yet tested with company credentials:
 
