@@ -1,0 +1,33 @@
+ {
+    "data": [
+        {
+            "AccNo": "300-0001",
+            "CompanyName": "Foreign Customer A",
+            "CurrencyCode": "USD",
+            "CreditTerm": "C.O.D.",
+            "Address": "3040 Limer Street, Atlanta, Georgia"
+        },
+        {
+            "AccNo": "300-D001",
+            "CompanyName": "Customer A",
+            "CurrencyCode": "MYR",
+            "CreditTerm": "C.O.D.",
+            "Address": "116 Jalan Damai, Kuala Lumpur, Wilayah Persekutuan"
+        },
+        {
+            "AccNo": "300-D002",
+            "CompanyName": "Customer B",
+            "CurrencyCode": "MYR",
+            "CreditTerm": "C.O.D.",
+            "Address": "No. 1327, Jalan Padang Benggali, Butterworth, Pulau Pinang"
+        },
+        {
+            "AccNo": "300-D003",
+            "CompanyName": "Customer C",
+            "CurrencyCode": "MYR",
+            "CreditTerm": "C.O.D.",
+            "Address": "34 Taman Taming Indah, Lorong Tengku Ahmad, Alor Setar, Selangor"
+        }
+    ],
+    "totalCount": 4
+}

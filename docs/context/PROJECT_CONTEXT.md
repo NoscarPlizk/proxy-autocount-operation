@@ -1,10 +1,10 @@
 # AutoCount Operations Proxy — Project Context
 
-**Context version:** 2026-11-09  
-**Implementation status reviewed:** 2026-11-09  
-**Official API documentation reviewed:** 2026-11-09
+**Context version:** 2026-11-11
+**Implementation status reviewed:** 2026-11-10
+**Official API documentation reviewed:** 2026-11-11
 
-This is the primary durable context for the project. Future development sessions must read it together with the repository implementation, `docs/AGENTS.md`, and `docs/context/IMPLEMENTATION_PLAN.md`.
+This is the primary durable context for the project. Future development sessions must read it together with the repository implementation, `docs/AGENTS.md`, `docs/context/AUTOCOUNT_API_CONTEXT.md`, and `docs/context/IMPLEMENTATION_PLAN.md`.
 
 ## 1. Project overview and business motivation
 
@@ -21,7 +21,7 @@ This document uses the following labels:
 - **Confirmed requirement** — explicitly required for the project.
 - **Proposed decision** — an initial architectural recommendation that may be refined before implementation.
 - **Documentation-verified** — confirmed in official AutoCount documentation as reviewed on the date above; it has not necessarily been exercised with company credentials.
-- **Environment-tested** — observed using authorized credentials against a named safe environment. There are currently no environment-tested AutoCount behaviors.
+- **Environment-tested** — observed in an authorized programmer-performed manual live check, with operator, account book/environment, date/time, target scope, and verification evidence recorded. There are currently no environment-tested AutoCount behaviors.
 - **Implemented and tested** — present in the repository and verified by the stated check.
 - **Unverified** — requires more documentation review, vendor clarification, or controlled testing.
 
@@ -88,6 +88,42 @@ AutoCount is the system of record. The proxy may hold operational copies needed 
 All integration traffic must originate from the backend through one centralized adapter. The adapter is responsible for authentication headers, endpoint paths, request/response mapping, pagination, timeouts, error normalization, rate-limit signals, logging redaction, and controlled retry behavior.
 
 No write is considered successful merely because the request was sent or a connection closed. The workflow must classify the outcome and verify the remote state using a documented method. A timeout after sending a write is an **unknown outcome**, not an automatic failure eligible for blind retry.
+
+### 6.1 Human-only live API activation and testing guardrail
+
+**Confirmed requirements (2026-11-10):**
+
+- AI agents and automated tests must never execute a request against a real AutoCount API endpoint or account book for discovery, experimentation, verification, or feature testing. This prohibition applies to reads as well as create, update, delete, void, approval, allocation, knock-off, and every other operation that can retrieve or affect real AutoCount data.
+- Automated unit, component, contract, and end-to-end coverage may exercise only mocks, local fixtures, or a local fake AutoCount service that is structurally prevented from resolving or connecting to the vendor host. Automated tests must not accept or load live AutoCount credentials.
+- Any live AutoCount check must be performed manually by an authorized programmer. AI may prepare code, review official documentation, produce a manual test procedure, and analyze sanitized results supplied by the programmer, but it must stop before executing the live request.
+- A programmer-performed live check must identify the operator, date/time, exact account book, environment/data classification, endpoint and method, target records or filters, sanitized request shape, expected effect, actual duration, outcome, verification evidence, and any cleanup or reconciliation. Only the behavior actually observed may be labelled **Environment-tested**.
+- Absence of a sandbox does not weaken this rule. If no safe non-production account book exists, routine automated coverage remains mock-only and any owner-approved manual test against a real account book must use the narrowest operation, scope, credentials, and dataset possible. A write operation must not be performed merely to discover what the API does.
+- No production or real-data operation may be described as a harmless test. Production writes are controlled business operations and require the same validation, authorization, audit, and verification as normal use.
+
+Before implementing or changing any feature that can activate AutoCount, development must produce an **API activation impact report** and explain it to the project owner. The report must state:
+
+1. the user action, frontend control, backend route/use case, adapter function, HTTP method, and exact documented AutoCount endpoint involved;
+2. whether the operation only reads or may create, modify, delete, void, approve, allocate, submit, or otherwise affect data;
+3. the account-book scope, record types, identifiers, filters, request fields, related records, and data returned or changed;
+4. authentication and API-method permissions, application authorization, feature flags, and environment/account-book guards;
+5. expected processing behavior and duration where evidence exists, configured timeout/cancellation behavior, rate-limit handling, concurrency, retries, and unknown-outcome handling;
+6. validation, duplicate protection, stale-data/conflict checks, review and confirmation requirements, audit events, and post-operation verification;
+7. failure, partial-success, reversibility, cleanup, reconciliation, and incident risks;
+8. mock/fixture test coverage and the technical control proving automated tests cannot reach AutoCount; and
+9. the exact human-only manual test procedure, including stop conditions and evidence the programmer must return.
+
+External API latency cannot be guaranteed exactly in advance. Reports must distinguish documented limits, measured programmer-supplied observations, estimates, configured timeouts, and unknowns rather than claiming a false 100% duration guarantee.
+
+Frontend controls are part of the same safety boundary. Any button, link, form submission, keyboard shortcut, bulk action, retry control, or automatic UI effect that can reach a backend AutoCount workflow must:
+
+- have its full frontend-to-backend-to-AutoCount trigger path documented in the impact report;
+- state the selected company/account book and operation consequence clearly before activation;
+- prevent accidental double submission and remain disabled when permissions, configuration, validation, review, or feature gates are incomplete;
+- use deliberate confirmation proportional to impact, with stronger controls for writes and destructive/high-impact actions;
+- expose pending, succeeded, failed, partial, conflict, and unknown states without implying success before backend verification; and
+- never call AutoCount directly or treat a presentation-only control as an implemented operation.
+
+For every future development task that introduces or changes such a backend path or interactive control, the AI must explain these effects and safeguards to the project owner before implementation and summarize the implemented boundary at handoff.
 
 ## 7. Core functional modules
 
@@ -209,7 +245,9 @@ This is a high-risk module and must not be the first write implementation.
 
 ## 10. AutoCount API integration knowledge
 
-### 10.1 Documentation-verified as of 2026-11-09
+`docs/context/AUTOCOUNT_API_CONTEXT.md` is the mandatory entry point for AutoCount API work. The current official documentation at <https://accounting-api.autocountcloud.com/documentation/> is the source of truth for published API rules, with the official Swagger reference as its technical supplement. The facts below are dated summaries only; re-check the exact current official endpoint, field-format, and data-model pages before relying on them.
+
+### 10.1 Documentation-verified as of 2026-11-11
 
 The following statements are supported by the official documentation reviewed during initialization. They are not yet tested with company credentials:
 
@@ -285,6 +323,7 @@ validation/matching      job processor
 ```text
 src/                         React application (already present)
 backend/                     exclusive root for all backend code
+  company-accounts/            ignored per-company `.env` credential files and committed template
   src/
     config/                  validated backend configuration
     http/                    Express setup, middleware, controllers
@@ -293,7 +332,7 @@ backend/                     exclusive root for all backend code
     integrations/autocount/  one AutoCount client/adapter
     jobs/                    controlled per-record processing
     persistence/             repositories and transaction boundaries
-  test/                      backend unit/contract/integration tests
+  test/                      backend unit/contract/mock-integration tests
 shared/                      narrowly scoped shared transport contracts
 db/migrations/               versioned schema changes when DB is introduced
 docs/
@@ -303,7 +342,7 @@ docs/
 
 ### Technology direction
 
-- **Existing and implemented:** React 19, TypeScript, Vite.
+- **Existing and implemented:** React 19, TypeScript, Vite, React Router, Node.js, and Express.
 - **Confirmed preference:** React-Bootstrap, React Router, Node.js, Express, and PostgreSQL when persistence is required.
 - **Confirmed repository boundary:** all backend code must live under the repository-root `backend/` folder. This includes backend server and root entry files, routes and endpoint modules, configuration, middleware, controllers, services, domain logic, integrations, jobs, persistence code, backend-only helpers, and backend tests. Do not place backend implementation files elsewhere in the repository.
 - **Proposed decision:** use TypeScript in both frontend and backend for consistent contracts and safer adapter/payload code.
@@ -352,33 +391,48 @@ docs/
 | Excessive API permissions or leaked keys | Unauthorized financial access | Backend-only secrets, least privilege, rotation, redaction |
 | Unsafe numeric/date handling | Amount or period errors | Decimal strategy, accounting-date types, validation and tests |
 | Stale cached master/outstanding data | Invalid dependency or allocation | Freshness rules and immediate pre-submit revalidation |
+| AI or automated testing reaches a real AutoCount account book | Unreviewed access to or mutation of real accounting data | Mock-only automation, no live credentials in tests, vendor-host network denial, human-only manual live checks |
+| Interactive control hides or misrepresents its backend effect | Accidental submission, duplicate action, or false success | Documented trigger chain, account-book context, feature/permission gates, confirmation, single-submit protection, verified outcome states |
 
 ## 14. Current implementation status
 
 ### Implemented
 
-- A minimal React 19 + TypeScript + Vite starter scaffold exists at the repository root.
-- ESLint and TypeScript/Vite build scripts exist.
+- A React 19 + TypeScript + Vite portal exists at the repository root with React Router nested routes.
+- The first layer at `/` retrieves safe company metadata from the backend and displays one company choice per discovered `backend/company-accounts/*.env` file.
+- The second layer uses `/companies/:companySlug` and nested Sales, Purchase, and Accounting routes so company context remains in the URL.
+- A TypeScript/Express backend exists under `backend/` with health and safe company-metadata routes.
+- Each AutoCount company/account book is modeled by one ignored backend-only file in `backend/company-accounts/`; each file requires a root URL, Key ID, and API key. A placeholder template and setup instructions are committed in that directory.
+- Company public names, initials, accents, and route slugs are derived from environment filenames. The backend rescans the directory for each metadata request, returns safe file/configuration counts, and never serializes credentials or filenames.
+- Missing, partial, placeholder, non-HTTPS, and root-only URL configurations are classified without returning secrets to the browser.
+- The Sales page is a read-only invoice listing view. It requests the current calendar month on mount, accepts a required start/end document-date range of up to 366 days, and provides every sample `master` property as an orderable, hideable invoice column. Each invoice row can expand to a nested table that provides every sample `details` property as an independently orderable, hideable line-item column.
+- Invoice and line-item column visibility/order preferences are versioned, stored per company in browser local storage, reconciled when the known schema changes, and resettable to recommended defaults. Only presentation settings are stored; invoice/accounting data and expanded-row state are not persisted.
+- `GET /api/companies/:companySlug/invoices` validates the company and date range, then uses a centralized invoice-specific AutoCount adapter to call only `GET /{accountBookId}/invoice/listing`. The adapter injects backend-only credentials, validates the response shape, aggregates up to 100 pages/10,000 records, applies a 15-second timeout per page, performs no automatic retries, and normalizes failures without returning vendor payloads or credentials.
+- No generic AutoCount request function and no invoice create, update, delete, void, or other write route is present.
+- ESLint and frontend/backend TypeScript build scripts exist.
 - Project initialization context is captured in `docs/AGENTS.md`, this file, and `docs/context/IMPLEMENTATION_PLAN.md`.
 
 ### Tested
 
-- No AutoCount integration, accounting workflow, or application feature has been environment-tested.
-- On 2026-11-09, the unchanged starter scaffold passed `npm run lint` and `npm run build` after the context files were added.
+- No AutoCount integration or accounting workflow has been environment-tested.
+- On 2026-11-10, `npm run lint`, `npm run build:all`, and `npm --prefix backend test` passed for dynamic company discovery, company-selection gating, nested routing, and backend configuration.
+- Local mock-only configuration tests confirmed an empty directory returns zero companies, each `.env` file produces one safe company record, invalid files remain blocked, newly added files are found on the next scan, and no credential value is present in public serialization.
+- On 2026-11-11, mock-only invoice tests passed for GET URL/query/header construction, fixture-shape parsing, multi-page aggregation, authorization redaction, malformed responses, timeouts, and date-range validation. `npm run lint`, `npm run build:all`, and `npm --prefix backend test` passed with seven backend tests.
+- On 2026-11-11, lint and frontend/backend builds passed after adding the configurable master/detail tables and local-storage preference reconciliation. Browser-level interaction coverage remains pending.
+- Production dependency audit reported no known vulnerabilities. Browser visual QA was not completed because the available embedded browser could not reach the Windows loopback preview server.
 
 ### Not implemented
 
-- Production UI, navigation, authentication, roles, or account-book selection.
-- Backend/Express application.
-- Configuration validation or secret management integration.
-- AutoCount client or any API call.
+- Portal-user authentication, roles, per-company authorization, and production-ready account-book selection.
+- Production secret-manager integration and live credential rotation.
+- Customer listing and individual-invoice retrieval adapters.
 - Database schema, migrations, staging, mappings, jobs, audit, or queue.
 - Excel/CSV parsing and spreadsheet editing.
 - Master-data matching, dependency validation, or duplicate detection.
 - Import, bulk edit, cash book, purchase, knock-off, or history features.
-- Automated tests beyond the scaffold's lint/build tooling.
+- Browser-level invoice UI tests, audit logging, production monitoring, and programmer-supplied environment evidence for the invoice listing.
 
-The starter screen must not be interpreted as product functionality.
+Purchase and Accounting module tiles remain placeholders and must not be interpreted as accounting functionality. The Sales page implements invoice retrieval only and must not be interpreted as write capability.
 
 ## 15. Important architectural decisions
 
@@ -390,11 +444,15 @@ The starter screen must not be interpreted as product functionality.
 - Financial writes require validation, review, verification, and audit.
 - Ambiguity blocks automation.
 - Context documentation must remain synchronized with implementation.
+- Keep the root Vite frontend and the TypeScript/Express backend under the repository-root `backend/` folder.
+- Treat each company/account book as an independent credential file under `backend/company-accounts/`, even when multiple companies share an AutoCount registered account.
+- Keep the public route slug separate from backend AutoCount credentials and never return the root URL, Key ID, or API key to the browser.
+- AI agents and automated tests may use only mocks/local fixtures and must never execute live AutoCount requests; live checks are performed manually by an authorized programmer.
+- Require an API activation impact report and owner explanation before implementing or changing any AutoCount-connected backend path or interactive frontend trigger.
+- Treat frontend controls that can initiate backend AutoCount work as part of the accounting safety boundary, not as presentation-only details.
 
 ### Proposed decisions awaiting implementation evidence
 
-- Keep the current root Vite frontend and place the entire backend under `backend/` rather than immediately converting to a complex monorepo.
-- Use TypeScript end-to-end.
 - Implement an adapter interface around AutoCount to make contract tests and safe mocks straightforward.
 - Use explicit workflow state machines and append-only audit events.
 - Introduce PostgreSQL in Phase 2 when persistent staging and job history are required.
@@ -440,16 +498,16 @@ Build a **read-only AutoCount connectivity slice**:
 3. Configure one designated non-production account book.
 4. Implement one documentation-checked read-only customer listing and one read-only invoice listing path, including pagination and normalized errors.
 5. Expose a minimal authenticated/admin-only UI or development view showing connection status and sample results without secrets.
-6. Add mocked contract tests and run a controlled read-only integration check if credentials are provided.
-7. Record the exact observed behavior, permissions, rate-limit headers, and unresolved differences here.
+6. Add mocked contract tests that cannot load live credentials or reach the vendor host, and prepare a human-only manual connectivity checklist.
+7. Have an authorized programmer run any approved read-only connectivity check and return sanitized evidence; record only that programmer-observed behavior, permissions, rate-limit headers, latency, and unresolved differences here.
 
 This milestone validates the highest-risk integration boundary without changing accounting records.
 
 ## 18. Next recommended tasks
 
-1. Confirm access to a non-production account book and obtain a least-privilege read-only key through an approved secret channel.
+1. Confirm whether a non-production account book exists, identify the authorized programmer for live checks, and establish least-privilege read-only credentials that are unavailable to automated tests and AI-run commands.
 2. Decide the initial application authentication approach and development/deployment environment.
 3. Review the exact customer and invoice listing input/response models in official documentation.
-4. Implement and test the read-only connectivity slice described above.
+4. Implement the read-only connectivity slice with mock-only automated coverage, then hand its live connectivity checklist to the authorized programmer for manual execution.
 5. After connectivity is proven, interview administrators and inspect representative redacted source files to define the first versioned import schema and duplicate rules.
 6. Do not implement write paths until read behavior, error normalization, permissions, test-book safety, and reconciliation design are understood.

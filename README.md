@@ -1,75 +1,53 @@
-# React + TypeScript + Vite
+# AutoCount Operations Proxy
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Local React and Express sample that discovers AutoCount company accounts from separate backend environment files and keeps the selected company in every nested portal route.
 
-Currently, two official plugins are available:
+## Current sample
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `/` — first-layer company selection.
+- `/companies/:companySlug` — second-layer company overview.
+- `/companies/:companySlug/sales` — Sales sector.
+- `/companies/:companySlug/purchase` — Purchase sector.
+- `/companies/:companySlug/accounting` — Accounting sector.
+- `GET /api/companies` — safe company metadata, discovered-file count, and local configuration status.
+- `GET /api/health` — backend health, company-file count, and configured-company count.
 
-## React Compiler
+This sample does not call AutoCount or perform accounting reads/writes yet. It only validates whether each company has all three required environment values.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Environment setup
 
-## Expanding the ESLint configuration
+Keep process settings such as `HOST` and `PORT` in `backend/.env` when needed. Company credentials belong in separate files under `backend/company-accounts/`.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Copy `backend/company-accounts/company-name.env.example` to a descriptive filename ending in `.env`, such as `acme-trading.env`, and replace all three placeholders:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```dotenv
+AUTOCOUNT_ROOT_URL=https://accounting-api.autocountcloud.com/<account-book-id>
+AUTOCOUNT_KEY_ID=<key-id>
+AUTOCOUNT_API_KEY=<api-key>
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Create one file per company/account book. The filename is converted into the public name and route slug: `acme-trading.env` becomes “Acme Trading” at `/companies/acme-trading`. Reload the first portal page after adding a file.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Actual files in `backend/company-accounts/*.env` are ignored by Git. Never prefix these values with `VITE_` or copy them into frontend code.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Run locally
 
+```powershell
+npm install
+npm --prefix backend install
+npm run dev
 ```
+
+The Vite frontend proxies `/api` requests to the local backend on `http://127.0.0.1:3001`.
+
+## Checks
+
+```powershell
+npm run lint
+npm run build:all
+npm --prefix backend test
+```
+
+## Security boundary
+
+The backend rescans the company-account directory for each metadata request but never returns the root URL, Key ID, API key, configuration filename, or environment-variable names to the browser. A company workspace link is enabled only after local structural validation. This does not authenticate against AutoCount. Portal-user authentication and live AutoCount endpoint calls are deliberately deferred; do not expose this sample publicly with real credentials until authentication and authorization are implemented.
