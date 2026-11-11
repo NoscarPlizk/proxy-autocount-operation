@@ -107,7 +107,10 @@ Use the status labels defined in `docs/AGENTS.md`. Do not describe planned or un
 - While a request is pending, the date controls and button are disabled to prevent duplicate activation. Changing inputs alone does not call AutoCount; submitting the form does.
 - The backend resolves the selected company independently, rejects unknown/unconfigured companies, and calls the named `getInvoiceListing` adapter function. The adapter performs only vendor `GET /{accountBookId}/invoice/listing` requests and supplies `page`, `startDate`, `endDate`, `API-Key`, and `Key-ID`.
 - Each vendor page has a 15-second timeout. Pages are requested sequentially until `totalCount` is reached, with a ceiling of 100 pages/10,000 invoices. No automatic retry is performed. A range above the ceiling is rejected and must be narrowed.
-- The response is validated against the fixture's root, invoice master, and details structure before it is returned. The UI displays invoice number, document date, customer name/code, status, cancellation state, currency/final total, and outstanding amount; no financial recalculation is performed.
+- The response is validated against the fixture's root, invoice master, and details structure before it is returned. Every `master` property in the committed sample is available as a main-table column. Each invoice has a rightmost control that expands a nested table containing its `details` rows, and every sample detail property is available as a line-item column. No financial recalculation is performed.
+- The Columns panel has separate Invoice columns and Line-item columns tabs. Users can search fields, show/hide them, move them left/right through ordered controls, show all fields, or restore recommended defaults. At least one data column must remain visible in each table.
+- Column visibility and order are stored automatically under a versioned, company-scoped browser local-storage key. Saved layouts survive page, browser, device, and server restarts on the same browser profile and origin. Stored layouts are reconciled with newly introduced columns and malformed/obsolete entries are ignored.
+- The line-item layout is shared by every expanded invoice. Multiple invoices may be expanded during a session, but expanded invoice state is deliberately not persisted.
 - Loading, empty, validation, normalized authorization/rate-limit/timeout/upstream/malformed-response errors, and successful result-count states are visible. Vendor error bodies and credentials are never returned to the browser.
 - The page explicitly states that create, edit, void, and delete actions do not exist. There is no generic outbound request route or write method.
 
@@ -115,7 +118,7 @@ Use the status labels defined in `docs/AGENTS.md`. Do not describe planned or un
 
 - The AutoCount key should have only the invoice-listing GET permission. The code cannot verify the key's configured vendor permissions without a programmer-run live check.
 - Portal-user authentication and per-user company authorization remain unimplemented. The Express service binds to loopback by default; do not deploy or expose it with real credentials until backend authentication/authorization is added.
-- The full validated invoice objects are returned to the browser even though the current table displays only summary fields. Browser storage and a database are not used.
+- The full validated invoice objects are returned to the browser, but only column presentation preferences are written to browser local storage. Invoice/customer/accounting values are not persisted in browser storage, and no database is used.
 - External latency, rate-limit policy/headers, configured-account behavior, and production result shape remain **Unverified**.
 
 ### Manual GET-only connectivity procedure
@@ -179,3 +182,4 @@ Only an authorized programmer may perform this procedure. AI agents, automated t
 - Replaced the Sales navigation sample with the current-month-on-mount invoice listing, date-range form, pending/error/empty/success states, and read-only invoice table.
 - `npm run lint`, `npm run build:all`, and `npm --prefix backend test` passed. Seven backend tests passed, including four invoice adapter/range tests using injected mock fetch implementations and the committed sample fixture.
 - No live AutoCount request, environment test, browser automation against the configured account, or accounting data mutation was performed.
+- Added configurable master/detail columns, expandable price-list sub-tables, and per-company local-storage layout persistence. These controls use already-loaded response data and do not trigger additional AutoCount traffic.

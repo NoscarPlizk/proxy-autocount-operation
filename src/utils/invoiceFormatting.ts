@@ -1,4 +1,5 @@
 import type { InvoiceDateRange } from '../types/invoice'
+import { invoiceCurrencyFields, invoiceDateFields, invoiceTimestampFields } from '../data/invoiceColumns'
 
 function toIsoDate(year: number, month: number, day: number) {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
@@ -36,4 +37,17 @@ export function formatInvoiceAmount(amount: number, currency: string) {
   } catch {
     return `${currency} ${amount.toFixed(2)}`
   }
+}
+
+export function formatInvoiceValue(key: string, value: unknown, currency: string) {
+  if (value === null || value === undefined || value === '') return '—'
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+  if (typeof value === 'number') {
+    if (invoiceCurrencyFields.has(key)) return formatInvoiceAmount(value, currency)
+    return new Intl.NumberFormat('en-MY', { maximumFractionDigits: 8 }).format(value)
+  }
+  if (typeof value === 'string' && invoiceDateFields.has(key)) return formatInvoiceDate(value)
+  if (typeof value === 'string' && invoiceTimestampFields.has(key)) return value.replace('T', ' ')
+  if (typeof value === 'object') return JSON.stringify(value)
+  return String(value)
 }
