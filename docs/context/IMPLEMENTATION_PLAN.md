@@ -62,7 +62,7 @@ This plan is incremental and risk-ordered. Completion means the stated deliverab
 
 **Goal:** prove secure backend connectivity and normalize read behavior without changing accounting records.
 
-**Implementation note (2026-11-10):** the repository now contains the initial TypeScript/Express process, health and safe company-metadata routes, dynamic discovery of independent server-only company credential files, and the company-selection/nested-routing UI. Local mock-only tests cover discovery, validation, rescanning, and public serialization. This is a foundation sample only. Portal authentication, a centralized AutoCount adapter, live read calls, adapter contract tests, and controlled non-production connectivity remain incomplete.
+**Implementation note (2026-11-11):** the repository contains the TypeScript/Express process, safe company metadata, and one invoice-listing-only vertical slice. The Sales page retrieves the current month on mount and accepts a bounded document-date range. The backend exposes one company-scoped invoice GET route and a centralized invoice-specific AutoCount adapter with backend-only headers, pagination, timeout, response validation, and normalized errors. Mock-only tests cover the supplied fixture, request construction, pagination, timeout, malformed data, authorization redaction, and range validation. No live request has been made. Portal authentication, customer listing, individual-invoice retrieval, broader automated network denial, and programmer-controlled connectivity evidence remain incomplete.
 
 ### 1.1 Requirements and design
 
@@ -458,9 +458,9 @@ Every phase that introduces or changes an AutoCount-connected read, write, or in
 
 ## Immediate next milestone
 
-The next recommended development task is Phase 1's read-only connectivity slice: add the minimal backend and centralized AutoCount adapter, cover customer and invoice listings using mocks/local fixtures, and prepare a manual connectivity checklist for an authorized programmer. AI and automated tests must not retrieve data from a real AutoCount account book. Do not implement create/update/delete/void operations in that milestone.
+The next recommended development task is to have an authorized programmer perform the recorded manual invoice-listing GET check, return sanitized evidence, and add portal authentication before any deployed use. Customer listing and individual-invoice retrieval may follow as separate GET-only slices after their own contract review. AI and automated tests must not retrieve data from a real AutoCount account book. Do not implement create/update/delete/void operations in this phase.
 
-Before coding it, obtain decisions or safe defaults for:
+Before enabling broader use, obtain decisions or safe defaults for:
 
 - non-production account-book availability and ID, or the narrowly approved real account book for a programmer-performed manual read-only check;
 - the authorized programmer who will execute live checks and return sanitized evidence;

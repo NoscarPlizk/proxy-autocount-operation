@@ -57,6 +57,19 @@ As reviewed on 2026-11-11, the official Getting Started page states that:
 
 These are **Documentation-verified**, not **Environment-tested**. Endpoint-specific facts already recorded in `docs/context/PROJECT_CONTEXT.md` remain dated summaries and must be revalidated against the exact current official pages before use.
 
+### Invoice listing GET contract reviewed for implementation
+
+**Documentation-verified on 2026-11-11:** the simple invoice listing operation is `GET /{accountBookId}/invoice/listing`. It requires a one-based `page` query value, accepts nullable `startDate` and `endDate` values that filter `docDate` inclusively, returns at most 100 records per page, and returns an object containing an invoice-view-model `data` array and numeric `totalCount`. The application imposes stricter local rules: both dates are required, the inclusive range may not exceed 366 days, no more than 100 pages/10,000 records are retrieved, each page has a 15-second timeout, and requests are not automatically retried.
+
+Official sources consulted:
+
+- <https://accounting-api.autocountcloud.com/documentation/>
+- <https://accounting-api.autocountcloud.com/documentation/api-methods/invoice/get-invoice-listing-simple/>
+- <https://accounting-api.autocountcloud.com/documentation/models/invoice/viewmodels/invoice-viewmodel/>
+- <https://accounting-api.autocountcloud.com/swagger/index.html>
+
+The current Swagger UI lists `GET /{accountBookId}/invoice/listing` as “Get invoice listing (filter by date only).” Runtime permission behavior, rate limits, response headers, latency, and behavior for the configured account book remain **Unverified** until an authorized programmer performs the documented manual check. The fixture-backed automated tests are not environment evidence.
+
 ## Required reading relationship
 
 Use this file together with:

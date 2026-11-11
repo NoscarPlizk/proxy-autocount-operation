@@ -2,6 +2,7 @@ import { Navigate, useOutletContext, useParams } from 'react-router-dom'
 import { Icon, type IconName } from '../components/Icon'
 import { findSector } from '../data/sectors'
 import type { PortalCompany } from '../types/company'
+import { SalesPage } from './SalesPage'
 
 const sectorIcons: Record<string, IconName> = { sales: 'sales', purchase: 'purchase', accounting: 'ledger' }
 
@@ -10,6 +11,7 @@ export function SectorPage() {
   const { company } = useOutletContext<{ company: PortalCompany }>()
   const sector = findSector(sectorParam)
   if (!sector) return <Navigate to={`/companies/${company.slug}`} replace />
+  if (sector.key === 'sales') return <SalesPage key={company.slug} company={company} />
 
   return (
     <main className="page-wrap">

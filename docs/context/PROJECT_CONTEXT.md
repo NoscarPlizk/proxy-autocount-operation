@@ -405,6 +405,9 @@ docs/
 - Each AutoCount company/account book is modeled by one ignored backend-only file in `backend/company-accounts/`; each file requires a root URL, Key ID, and API key. A placeholder template and setup instructions are committed in that directory.
 - Company public names, initials, accents, and route slugs are derived from environment filenames. The backend rescans the directory for each metadata request, returns safe file/configuration counts, and never serializes credentials or filenames.
 - Missing, partial, placeholder, non-HTTPS, and root-only URL configurations are classified without returning secrets to the browser.
+- The Sales page is a read-only invoice listing view. It requests the current calendar month on mount, accepts a required start/end document-date range of up to 366 days, and displays invoice number, date, customer, status, final total, cancellation state, and outstanding amount.
+- `GET /api/companies/:companySlug/invoices` validates the company and date range, then uses a centralized invoice-specific AutoCount adapter to call only `GET /{accountBookId}/invoice/listing`. The adapter injects backend-only credentials, validates the response shape, aggregates up to 100 pages/10,000 records, applies a 15-second timeout per page, performs no automatic retries, and normalizes failures without returning vendor payloads or credentials.
+- No generic AutoCount request function and no invoice create, update, delete, void, or other write route is present.
 - ESLint and frontend/backend TypeScript build scripts exist.
 - Project initialization context is captured in `docs/AGENTS.md`, this file, and `docs/context/IMPLEMENTATION_PLAN.md`.
 
@@ -413,20 +416,21 @@ docs/
 - No AutoCount integration or accounting workflow has been environment-tested.
 - On 2026-11-10, `npm run lint`, `npm run build:all`, and `npm --prefix backend test` passed for dynamic company discovery, company-selection gating, nested routing, and backend configuration.
 - Local mock-only configuration tests confirmed an empty directory returns zero companies, each `.env` file produces one safe company record, invalid files remain blocked, newly added files are found on the next scan, and no credential value is present in public serialization.
+- On 2026-11-11, mock-only invoice tests passed for GET URL/query/header construction, fixture-shape parsing, multi-page aggregation, authorization redaction, malformed responses, timeouts, and date-range validation. `npm run lint`, `npm run build:all`, and `npm --prefix backend test` passed with seven backend tests.
 - Production dependency audit reported no known vulnerabilities. Browser visual QA was not completed because the available embedded browser could not reach the Windows loopback preview server.
 
 ### Not implemented
 
 - Portal-user authentication, roles, per-company authorization, and production-ready account-book selection.
 - Production secret-manager integration and live credential rotation.
-- AutoCount client or any API call.
+- Customer listing and individual-invoice retrieval adapters.
 - Database schema, migrations, staging, mappings, jobs, audit, or queue.
 - Excel/CSV parsing and spreadsheet editing.
 - Master-data matching, dependency validation, or duplicate detection.
 - Import, bulk edit, cash book, purchase, knock-off, or history features.
-- Automated tests beyond the scaffold's lint/build tooling.
+- Browser-level invoice UI tests, audit logging, production monitoring, and programmer-supplied environment evidence for the invoice listing.
 
-The implemented pages are a navigation and configuration sample. Sector module tiles are placeholders and must not be interpreted as accounting functionality.
+Purchase and Accounting module tiles remain placeholders and must not be interpreted as accounting functionality. The Sales page implements invoice retrieval only and must not be interpreted as write capability.
 
 ## 15. Important architectural decisions
 

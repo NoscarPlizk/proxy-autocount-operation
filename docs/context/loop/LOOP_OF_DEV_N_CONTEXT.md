@@ -41,7 +41,7 @@ Use the status labels defined in `docs/AGENTS.md`. Do not describe planned or un
 - Vite proxies `/api` to the local Express backend on `127.0.0.1:3001`. The backend binds to loopback by default.
 - The configuration status only proves local values are present and structurally plausible; it does not prove AutoCount accepted them or that permissions are sufficient.
 - **Security limitation:** portal authentication and per-user company authorization are not implemented. Do not publish or expose this sample with real credentials.
-- **Integration limitation:** there is no centralized AutoCount client, outbound request, persistence, audit trail, or accounting workflow.
+- **Integration limitation:** an invoice-listing-only AutoCount client and outbound GET path now exist. There is no portal authentication, persistence, audit trail, customer adapter, individual invoice retrieval, or write workflow. Do not expose this local sample publicly while real credentials are configured.
 
 ## Page: company selection
 
@@ -93,16 +93,51 @@ Use the status labels defined in `docs/AGENTS.md`. Do not describe planned or un
 - A recent-activity empty state explicitly states that no AutoCount read or write is performed.
 - No accounting data, calculation, database state, approval, audit event, or submission is present.
 
-## Pages: Sales, Purchase, and Accounting sectors
+## Page: Sales invoices
 
-- **Routes:** `/companies/:companySlug/sales`, `/companies/:companySlug/purchase`, and `/companies/:companySlug/accounting`.
+- **Route:** `/companies/:companySlug/sales`.
+- **Purpose:** retrieve and display sales invoice listings for the selected company using the documented AutoCount GET-only simple invoice listing operation.
+- **Primary implementation:** `src/pages/SalesPage.tsx`, `src/api/invoiceApi.ts`, `src/utils/invoiceFormatting.ts`, `backend/src/routes/invoice-routes.ts`, `backend/src/services/invoice-service.ts`, and `backend/src/integrations/autocount/`.
+- **Status:** **Implemented, build-tested, and mock-tested** on 2026-11-11. It is not **Environment-tested**; no AI or automated process made a live request.
+
+### Features, data flow, and controls
+
+- On mount, the page requests invoices from the first day of the user's current local calendar month through the current local date.
+- The start/end date inputs and “Fetch invoices” button trigger `GET /api/companies/:companySlug/invoices?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD` through the named frontend API function. Both dates are required, start must not follow end, and the inclusive range is limited to 366 days in the frontend and backend.
+- While a request is pending, the date controls and button are disabled to prevent duplicate activation. Changing inputs alone does not call AutoCount; submitting the form does.
+- The backend resolves the selected company independently, rejects unknown/unconfigured companies, and calls the named `getInvoiceListing` adapter function. The adapter performs only vendor `GET /{accountBookId}/invoice/listing` requests and supplies `page`, `startDate`, `endDate`, `API-Key`, and `Key-ID`.
+- Each vendor page has a 15-second timeout. Pages are requested sequentially until `totalCount` is reached, with a ceiling of 100 pages/10,000 invoices. No automatic retry is performed. A range above the ceiling is rejected and must be narrowed.
+- The response is validated against the fixture's root, invoice master, and details structure before it is returned. The UI displays invoice number, document date, customer name/code, status, cancellation state, currency/final total, and outstanding amount; no financial recalculation is performed.
+- Loading, empty, validation, normalized authorization/rate-limit/timeout/upstream/malformed-response errors, and successful result-count states are visible. Vendor error bodies and credentials are never returned to the browser.
+- The page explicitly states that create, edit, void, and delete actions do not exist. There is no generic outbound request route or write method.
+
+### Limitations and permissions
+
+- The AutoCount key should have only the invoice-listing GET permission. The code cannot verify the key's configured vendor permissions without a programmer-run live check.
+- Portal-user authentication and per-user company authorization remain unimplemented. The Express service binds to loopback by default; do not deploy or expose it with real credentials until backend authentication/authorization is added.
+- The full validated invoice objects are returned to the browser even though the current table displays only summary fields. Browser storage and a database are not used.
+- External latency, rate-limit policy/headers, configured-account behavior, and production result shape remain **Unverified**.
+
+### Manual GET-only connectivity procedure
+
+Only an authorized programmer may perform this procedure. AI agents, automated tests, browser automation, and CI must stop before the live request.
+
+1. Confirm the selected account book/environment, the operator identity, and that the configured key has invoice-listing GET permission only. Stop if the account book is wrong, the key has unnecessary write permissions, or the portal is reachable beyond the intended local/internal boundary.
+2. Start the portal and backend manually, open the selected company's Sales page, and note the date/time and initial current-month range. Opening the page performs one or more read-only invoice-listing GET requests.
+3. Use a narrow range known to contain few invoices. Select “Fetch invoices” once; do not repeatedly submit during a pending request. Stop on any unexpected route/method, credential exposure, non-GET traffic, more pages than expected, or vendor warning.
+4. Record sanitized evidence only: operator, date/time, account book/environment label, date range, endpoint/method, page count, returned count and field names (not customer data), actual duration, HTTP outcome, relevant rate-limit headers with sensitive values removed, UI state, and whether the displayed count matches AutoCount.
+5. Test an empty narrow date range and, if safely available, a known multi-page range. Stop if rate limiting occurs; do not automate retries.
+6. Return the sanitized evidence for documentation. No cleanup is expected because the operation is GET-only, but any unexpected change must be treated as an incident and reconciled in AutoCount before further use.
+
+## Pages: Purchase and Accounting sectors
+
+- **Routes:** `/companies/:companySlug/purchase` and `/companies/:companySlug/accounting`.
 - **Purpose:** demonstrate nested company-aware navigation and the intended module grouping.
 - **Primary implementation:** `src/pages/SectorPage.tsx` and `src/data/sectors.ts`.
 - **Status:** **Implemented and build-tested** as non-interactive module scaffolding.
 
 ### Features and behavior
 
-- Sales lists Customers, Quotations, Sales invoices, and Credit notes.
 - Purchase lists Suppliers, Purchase orders, Purchase invoices, and Purchase returns.
 - Accounting lists Chart of accounts, Journal entries, Cash book, and Knock-off entries.
 - Unknown sector values redirect to the selected company overview.
@@ -136,3 +171,11 @@ Use the status labels defined in `docs/AGENTS.md`. Do not describe planned or un
 - Replaced the three hard-coded company bundles with directory-based discovery of independent ignored `.env` files.
 - Added safe counts, an empty-directory state, credential-validation gating, and direct-route blocking for incomplete company files.
 - Added mock-only backend tests for empty, valid, invalid, newly added, ignored non-`.env`, and secret-redaction behavior. No AutoCount request was made.
+
+## Verification and synchronization record — 2026-11-11
+
+- Reviewed the official AutoCount Getting Started, simple invoice listing, invoice view model, and Swagger pages and recorded the GET contract and stricter local limits.
+- Added the invoice-listing-only backend route, service, adapter, fixture validation, pagination, timeout, and normalized errors; no generic request method or write operation was added.
+- Replaced the Sales navigation sample with the current-month-on-mount invoice listing, date-range form, pending/error/empty/success states, and read-only invoice table.
+- `npm run lint`, `npm run build:all`, and `npm --prefix backend test` passed. Seven backend tests passed, including four invoice adapter/range tests using injected mock fetch implementations and the committed sample fixture.
+- No live AutoCount request, environment test, browser automation against the configured account, or accounting data mutation was performed.

@@ -1,6 +1,7 @@
 import express from 'express'
 import { listCompanyConfigs } from './config/company-config.js'
 import { companyRouter } from './routes/company-routes.js'
+import { invoiceRouter } from './routes/invoice-routes.js'
 
 const app = express()
 const port = Number(process.env.PORT ?? 3001)
@@ -19,6 +20,7 @@ app.get('/api/health', (_request, response) => {
   })
 })
 
+app.use('/api/companies', invoiceRouter)
 app.use('/api/companies', companyRouter)
 app.use((_request, response) => {
   response.status(404).json({ code: 'not_found', message: 'API route not found.' })
